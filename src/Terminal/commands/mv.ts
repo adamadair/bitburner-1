@@ -66,6 +66,13 @@ export function mv(
 
       if (destFile != null) {
         // Already exists, will be overwritten, so we'll delete it
+
+        // Command doesnt work if script is running
+        if (server.isRunning(destPath)) {
+          terminal.error(`Cannot use 'mv' on a script that is running`);
+          return;
+        }
+
         const status = server.removeFile(destPath);
         if (!status.res) {
           terminal.error(`Something went wrong...please contact game dev (probably a bug)`);
@@ -77,7 +84,7 @@ export function mv(
 
       script.filename = destPath;
     } else if (srcFile instanceof TextFile) {
-      const textFile = srcFile as TextFile;
+      const textFile = srcFile ;
       if (!dest.endsWith(".txt")) {
         terminal.error(`Source and destination files must have the same type`);
         return;

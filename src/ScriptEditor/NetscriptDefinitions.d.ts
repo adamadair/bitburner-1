@@ -560,7 +560,7 @@ export interface BitNodeMultipliers {
   /** Influences how much money the player earns when completing working their job. */
   CompanyWorkMoney: number;
   /** Influences the money gain from dividends of corporations created by the player. */
-  CorporationSoftCap: number;
+  CorporationSoftcap: number;
   /** Influences the valuation of corporations created by the player. */
   CorporationValuation: number;
   /** Influences the base experience gained for each ability when the player commits a crime. */
@@ -1110,6 +1110,8 @@ export interface SleeveTask {
   gymStatType: string;
   /** Faction work type being performed, if any */
   factionWorkType: string;
+  /** Class being taken at university, if any */
+  className: string;
 }
 
 /**
@@ -2884,13 +2886,24 @@ export interface Bladeburner {
    * @remarks
    * RAM cost: 4 GB
    *
-   * Returns the number of seconds it takes to complete the specified action
+   * Returns the number of milliseconds it takes to complete the specified action
    *
    * @param type - Type of action.
    * @param name - Name of action. Must be an exact match.
    * @returns Number of milliseconds it takes to complete the specified action.
    */
   getActionTime(type: string, name: string): number;
+
+  /**
+   * Get the time elapsed on current action.
+   * @remarks
+   * RAM cost: 4 GB
+   *
+   * Returns the number of milliseconds already spent on the current action.
+   *
+   * @returns Number of milliseconds already spent on the current action.
+   */
+  getActionCurrentTime(): number;
 
   /**
    * Get estimate success chance of an action.
@@ -3244,7 +3257,7 @@ export interface Bladeburner {
    * @remarks
    * RAM cost: 0 GB
    *
-   * Returns the amount of accumulated “bonus time” (seconds) for the Bladeburner mechanic.
+   * Returns the amount of accumulated “bonus time” (milliseconds) for the Bladeburner mechanic.
    *
    * “Bonus time” is accumulated when the game is offline or if the game is inactive in the browser.
    *
@@ -3581,7 +3594,7 @@ export interface Gang {
    * @remarks
    * RAM cost: 0 GB
    *
-   * Returns the amount of accumulated “bonus time” (seconds) for the Gang mechanic.
+   * Returns the amount of accumulated “bonus time” (milliseconds) for the Gang mechanic.
    *
    * “Bonus time” is accumulated when the game is offline or if the game is inactive in the browser.
    *
@@ -3789,6 +3802,20 @@ export interface Sleeve {
    * @returns True if the aug was purchased and installed on the sleeve, false otherwise.
    */
   purchaseSleeveAug(sleeveNumber: number, augName: string): boolean;
+
+  /**
+   * Set a sleeve to perform bladeburner actions.
+   * @remarks
+   * RAM cost: 4 GB
+   *
+   * Return a boolean indicating whether or not the sleeve started working out.
+   *
+   * @param sleeveNumber - Index of the sleeve to workout at the gym.
+   * @param action - Name of the action to be performed.
+   * @param contract - Name of the contract if applicable.
+   * @returns True if the sleeve started working out, false otherwise.
+   */
+  setToBladeburnerAction(sleeveNumber: number, action: string, contract?: string): boolean;
 }
 
 /**
@@ -4285,12 +4312,18 @@ interface Stanek {
   acceptGift(): boolean;
 }
 
+/**
+ * @public
+ */
 export interface InfiltrationReward {
   tradeRep: number;
   sellCash: number;
   SoARep: number;
 }
 
+/**
+ * @public
+ */
 export interface InfiltrationLocation {
   location: any;
   reward: InfiltrationReward;
@@ -4391,6 +4424,13 @@ interface UserInterface {
    * RAM cost: 0 GB
    */
   getGameInfo(): GameInfo;
+
+  /**
+   * Clear the Terminal window, as if the player ran `clear` in the terminal
+   * @remarks
+   * RAM cost: 0.2 GB
+   */
+  clearTerminal(): void;
 }
 
 /**
@@ -4776,6 +4816,7 @@ export interface NS {
 
   /**
    * Suspends the script for n milliseconds. Doesn't block with concurrent calls.
+   * You should prefer 'sleep' over 'asleep' except when doing very complex UI work.
    * @remarks
    * RAM cost: 0 GB
    *
@@ -4973,6 +5014,21 @@ export interface NS {
    * @param args - Arguments for the script being tailed.
    */
   tail(fn?: FilenameOrPID, host?: string, ...args: any[]): void;
+
+  /**
+   * Close the tail window of a script.
+   * @remarks
+   * RAM cost: 0 GB
+   *
+   * Closes a script’s logs. This is functionally the same pressing the "Close" button on the tail window.
+   *
+   * If the function is called with no arguments, it will close the current script’s logs.
+   *
+   * Otherwise, the pid argument can be used to close the logs from another script.
+   *
+   * @param pid - Optional. PID of the script having its tail closed. If omitted, the current script is used.
+   */
+  closeTail(pid?: number): void;
 
   /**
    * Get the list of servers connected to a server.

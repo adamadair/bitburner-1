@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { jest, describe, expect, test } from "@jest/globals";
-
 import { CONSTANTS } from "../../src/Constants";
 import { Player } from "../../src/Player";
 import { IMap } from "../../src/types";
@@ -9,7 +6,6 @@ import { Company } from "../../src/Company/Company";
 import { Server } from "../../src/Server/Server";
 
 import { buyStock, sellStock, shortStock, sellShort } from "../../src/StockMarket/BuyingAndSelling";
-import { IStockMarket } from "../../src/StockMarket/IStockMarket";
 import { Order } from "../../src/StockMarket/Order";
 import {
   forecastForecastChangeFromCompanyWork,
@@ -461,17 +457,13 @@ describe("Stock Market Tests", function () {
 
       it("should trigger a price update when it has enough cycles", function () {
         // Get the initial prices
-        const initialValues: IMap<any> = {};
+        const initialValues: IMap<Stock> = {};
         for (const stockName in StockMarket) {
           const stock = StockMarket[stockName];
           if (!(stock instanceof Stock)) {
             continue;
           }
-          initialValues[stock.symbol] = {
-            b: stock.b,
-            otlkMag: stock.otlkMag,
-            price: stock.price,
-          };
+          initialValues[stock.symbol] = stock;
         }
 
         // Don't know or care how many exact cycles are required
@@ -1152,7 +1144,7 @@ describe("Stock Market Tests", function () {
         Player.setMoney(100e9);
 
         processOrdersRefs = {
-          stockMarket: StockMarket as IStockMarket,
+          stockMarket: StockMarket,
           symbolToStockMap: SymbolToStockMap,
         };
       });
